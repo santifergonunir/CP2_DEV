@@ -1,0 +1,10 @@
+az acr import --name cp2sfgacr.azurecr.io --source docker.io/library/hello-world:latest
+az acr import --name cp2sfgacr.azurecr.io --source docker.io/library/httpd:latest
+
+
+podman run cp2sfgacr.azurecr.io/library/httpd -p 80:80
+
+az acr update --name myregistry --anonymous-pull-enabled
+
+https://docs.rockylinux.org/es/books/learning_ansible/01-basic/
+
