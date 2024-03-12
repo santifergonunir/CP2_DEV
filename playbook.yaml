@@ -1,0 +1,49 @@
+---
+
+- name: install and deply podman
+  hosts: azure
+  remote_user: administrador
+
+  tasks:
+    - name: Update and upgrade os
+      become: true
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: install podman
+      become: true
+      apt:
+        name: podman
+        state: present
+
+    - name: pull image
+      containers.podman.podman_image:
+        name: "docker.io/library/httpd:latest"
+
+    - name: Build image
+      containers.podman.podman_image:
+        name: httpd
+        path: /tmp/
+        build:
+          format: docker
+
+    - name: push image
+      containers.podman.podman_image:
+        name: httpd
+        path: /tmp/
+        push: true
+        username: 
+        password: 
+        push_args:
+          dest: "cp2sfgacr.azurecr.io/library/"
+
+    - name: Deploy httpd
+      containers.podman.podman_container:
+        name: httpd
+        image: cp2sfgacr.azurecr.io/library/httpd
+        state: started
+        ports:
+          - "8080:80"
+
+
