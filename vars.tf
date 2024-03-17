@@ -15,9 +15,9 @@ variable "subnet_name" {
 }
 
 variable "usuario" {
-  default ="santiago.fernandez189@comunidadunir.net"
+  default ="st"
 }
 
 variable "password" {
-  default = "Buenosaires01"
+  default = ""
 }
