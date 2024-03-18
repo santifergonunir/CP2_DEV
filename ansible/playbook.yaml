@@ -53,5 +53,73 @@
           - "8080:80"
         volume:
           - /tmp/index/:/usr/local/apache2/htdocs/
-        ports:
-          - "8080:80"
+
+
+    - name: pull image backVote
+      containers.podman.podman_image:
+        name: mcr.microsoft.com/oss/bitnami/redis:6.0.8
+
+    - name: pull image frontVote
+      containers.podman.podman_image:
+        name: mcr.microsoft.com/azuredocs/azure-vote-front:v1
+
+    - name: Build image backVote
+      containers.podman.podman_image:
+        name: redis:6.0.8
+        path: /tmp/
+        build:
+          format: docker
+
+    - name: Build image frontVote
+      containers.podman.podman_image:
+        name: azure-vote-front:v1
+        path: /tmp/
+        build:
+          format: docker
+
+    - name: push image backVote
+      containers.podman.podman_image:
+        name: redis:6.0.8
+        path: /tmp/
+        push: true
+        username: cp2sfgacr
+        password: ""
+        push_args:
+          dest: "cp2sfgacr.azurecr.io/library/casopractico2/"
+
+    - name: push image frontVote
+      containers.podman.podman_image:
+        name: azure-vote-front:v1
+        path: /tmp/
+        push: true
+        username: cp2sfgacr
+        password: ""
+        push_args:
+          dest: "cp2sfgacr.azurecr.io/library/casopractico2/"
+
+    - name: install pip
+      become: true
+      apt:
+        name: pip
+        state: present
+    
+    - name: install prerequisites
+      ansible.builtin.pip:
+        name:
+           - openshift
+           - pyyaml
+           - kubernetes
+
+    - name: Create a k8s namespace
+      kubernetes.core.k8s:
+        kubeconfig: .kube/config
+        name: testing
+        api_version: v1
+        kind: Namespace
+        state: present
+    - name: Create deploy
+      kubernetes.core.k8s:
+        kubeconfig: .kube/config
+        state: present
+        src: vote-app.yml
+        namespace: testing
