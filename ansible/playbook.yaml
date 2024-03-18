@@ -38,10 +38,20 @@
         push_args:
           dest: "cp2sfgacr.azurecr.io/library/"
 
+    - name: copy File index.html
+      copy:
+        src: /tmp/index/index.html
+        dest: /tmp/index/
+
     - name: Deploy httpd   
       containers.podman.podman_container:
         name: httpd
         image: cp2sfgacr.azurecr.io/library/httpd
         state: started
+        restart: true
+        ports:
+          - "8080:80"
+        volume:
+          - /tmp/index/:/usr/local/apache2/htdocs/
         ports:
           - "8080:80"
